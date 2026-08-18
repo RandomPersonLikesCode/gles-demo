@@ -1,0 +1,8 @@
+.build/
+.cache/
+
+*.so
+*.p12
+
+conf.bash
+tags
