@@ -8,7 +8,7 @@ Core::Display::Display(const char *title, int width, int height)
   : window(nullptr), renderer_ctx(nullptr), title(title),
     width(width), height(height) {}
 
-Core::Display::~Display() {
+Core::Display::~Display(void) {
   SDL_GL_MakeCurrent(nullptr, nullptr);
 
   SDL_GL_DestroyContext(this->renderer_ctx);
@@ -16,7 +16,7 @@ Core::Display::~Display() {
   SDL_Quit();
 }
 
-bool Core::Display::init() {
+bool Core::Display::init(void) {
   SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
