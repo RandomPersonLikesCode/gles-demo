@@ -13,8 +13,8 @@ namespace Core {
     int width, height;
 
     Display(const char *title, int width, int height);
-    ~Display();
+    ~Display(void);
 
-    bool init();
+    bool init(void);
   };
 }
