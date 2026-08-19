@@ -14,12 +14,17 @@ int main(int argc, char *argv[]) {
   SDL_Event events = {};
   bool is_running = true;
 
-  Core::Display display("SDL Demo", 800, 600);
-  if(!display.init()) {
+  Core::Display display = {
+    nullptr,
+    nullptr,
+    "SDL Demo",
+    800,
+    600
+  }; if(!display.create()) {
     return 1;
   }
 
-  glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
   while (is_running) {
     while (SDL_PollEvent(&events)) {
