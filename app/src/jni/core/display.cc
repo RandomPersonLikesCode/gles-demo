@@ -4,10 +4,14 @@
 
 #include "./display.hh"
 
+#define LOG_ERR(msg, ...)                                        \
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, msg, __VA_ARGS__)
+
 bool Core::Display::create(void) {
     SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
+        LOG_ERR("SDL error: %s", SDL_GetError());
         return false;
     }
 
@@ -28,12 +32,14 @@ bool Core::Display::create(void) {
     );
 
     if (!this->window) {
+        LOG_ERR("SDL error: %s", SDL_GetError());
         return false;
     }
 
     this->renderer_ctx = SDL_GL_CreateContext(this->window);
 
     if (!this->renderer_ctx) {
+        LOG_ERR("SDL error: %s", SDL_GetError());
         return false;
     }
 
