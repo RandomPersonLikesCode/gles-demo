@@ -174,8 +174,8 @@ d8_flag="--min-api $min_sdk_ver --lib $sdk --output $cache_dir $java_classes $ja
 cc_32="$ndk_bin/armv7a-linux-androideabi$target_sdk_ver-clang++"
 cc_64="$ndk_bin/aarch64-linux-android$target_sdk_ver-clang++"
 
-cc_flag_c_d="-std=c++23 -Wall -Wextra -Wpedantic -Werror -O0 -g3 -fno-omit-frame-pointer -fno-rtti -fno-exceptions -DSDL_ASSERT_LEVEL=3 -isystem ../.$incl -fcolor-diagnostics -c -fPIC"
-cc_flag_c_r="-std=c++23 -Wall -Wextra -Wpedantic -Werror -O2 -flto=thin -ffunction-sections -fdata-sections -fno-rtti -fno-exceptions -DNDEBUG -DSDL_ASSERT_LEVEL=0 -isystem ../.$incl -fcolor-diagnostics -c -fPIC"
+cc_flag_c_d="-std=c++14 -Wall -Wextra -Wpedantic -Werror -O0 -g3 -fno-omit-frame-pointer -fno-rtti -fno-exceptions -DSDL_ASSERT_LEVEL=3 -isystem ../.$incl -fcolor-diagnostics -c -fPIC"
+cc_flag_c_r="-std=c++14 -Wall -Wextra -Wpedantic -Werror -O2 -flto=thin -ffunction-sections -fdata-sections -fno-rtti -fno-exceptions -DNDEBUG -DSDL_ASSERT_LEVEL=0 -isystem ../.$incl -fcolor-diagnostics -c -fPIC"
 cc_flag_l_d="-shared"
 cc_flag_l_r="-O2 -flto=thin -Wl,--gc-sections -shared"
 
