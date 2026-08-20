@@ -16,11 +16,9 @@ int main(int argc, char *argv[]) {
 
     Core::Display display = {
         .title = "SDL Demo",
-        .width = 800,
-        .height = 600,
     };
 
-    if(!display.create()) {
+    if (!display.create()) {
         return 1;
     }
 

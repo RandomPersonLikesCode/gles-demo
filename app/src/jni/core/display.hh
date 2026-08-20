@@ -10,7 +10,8 @@ namespace Core {
         SDL_GLContext renderer_ctx = nullptr;
 
         const char *title = "Window";
-        int width, height = 500;
+        int width = 800;
+        int height = 600;
 
         bool create(void);
         ~Display(void);
