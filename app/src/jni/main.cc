@@ -15,12 +15,12 @@ int main(int argc, char *argv[]) {
     bool is_running = true;
 
     Core::Display display = {
-        nullptr,
-        nullptr,
-        "SDL Demo",
-        800,
-        600
-    }; if(!display.create()) {
+        .title = "SDL Demo",
+        .width = 800,
+        .height = 600,
+    };
+
+    if(!display.create()) {
         return 1;
     }
 
