@@ -3,9 +3,7 @@
 #include <SDL3/SDL.h>
 
 #include "./display.hh"
-
-#define LOG_ERR(msg, ...)                                        \
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, msg, __VA_ARGS__)
+#include "../utils/logging.hh"
 
 bool Core::Display::create(void) {
     SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
