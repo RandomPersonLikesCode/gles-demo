@@ -10,12 +10,13 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "./core/display.hh"
+#include "./core/gui.hh"
 #include "./core/shader.hh"
 
 GLfloat verts[] = {
-    0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-   -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-    1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f
+    0.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+   -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f
 };
 
 int main(int argc, char *argv[]) {
@@ -30,21 +31,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    Core::GUI gui = {
+        .scaling = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay()) - 0.5f
+    };
+
+    gui.create(display.window, display.renderer_ctx);
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-
-    ImGui_ImplSDL3_InitForOpenGL(display.window, display.renderer_ctx);
-    ImGui_ImplOpenGL3_Init("#version 300 es");
-
-    float scaling = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
-
-    ImGuiStyle &style = ImGui::GetStyle();
-    style.ScaleAllSizes(scaling);
-    style.FontScaleDpi = scaling;
 
     GLuint vao = 0;
     glGenVertexArrays(1, &vao);
@@ -77,12 +71,10 @@ int main(int argc, char *argv[]) {
     glBindVertexArray(0);
 
     Core::Program prog = {};
-
-    // Also ignored here
     prog.create();
 
+    float color[] = {1.0f, 1.0f, 1.0f};
     bool is_running = true;
-    int value = 0;
     while (is_running) {
         SDL_Event events = {};
 
@@ -100,11 +92,9 @@ int main(int argc, char *argv[]) {
         ImGui::NewFrame();
 
         // TODO: expand more as needed
-        ImGui::Begin("Button or What?");
+        ImGui::Begin("Triangle Style");
 
-        ImGui::SliderInt("Slide me", &value, 0, 10);
-        ImGui::Text("Value = %d", value);
-        ImGui::Text("Value timed = %d", value * value);
+        ImGui::ColorPicker3("Color", color);
 
         ImGui::End();
 
@@ -112,6 +102,12 @@ int main(int argc, char *argv[]) {
 
         glUseProgram(prog.handle);
         glBindVertexArray(vao);
+
+        glUniform3fv(
+            glGetUniformLocation(prog.handle, "col_pick"),
+            1,
+            color
+        );
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
         ImGui::Render();

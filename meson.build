@@ -91,6 +91,7 @@ sources = files(
     jni_root + 'core/display.cc',
     jni_root + 'core/shader.cc',
     jni_root + 'core/shader.cc',
+    jni_root + 'core/gui.cc',
     imgui_root + 'imgui.cpp',
     imgui_root + 'imgui_draw.cpp',
     imgui_root + 'imgui_impl_opengl3.cpp',
