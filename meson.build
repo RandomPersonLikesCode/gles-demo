@@ -70,6 +70,8 @@ run_command(
 message('(Prebuild) Executing other commands')
 run_command('bash', 'scripts/prebuild.bash', check: true)
 
+strip = find_program('strip', required: true)
+
 # Libraries
 
 cc = meson.get_compiler('cpp')
@@ -102,6 +104,7 @@ main = executable(
     sources,
 
     android_exe_type: 'application',
+    install: false,
     include_directories: system_incl,
     link_args: [
         '-static-libstdc++'
@@ -113,9 +116,36 @@ main = executable(
     ]
 )
 
-custom_target(
+if get_option('buildtype') == 'release'
+    strip = custom_target(
+        'strip',
+        depends: main,
+        input: main,
+        output: 'blank',
+        build_by_default: true,
+        command: [
+            strip,
+            '--strip-unneeded',
+            '@INPUT@'
+        ]
+    )
+else
+    strip = custom_target(
+        'strip',
+        depends: main,
+        input: main,
+        output: 'blank',
+        build_by_default: true,
+        command: [
+            'test',
+            '1 == 1'
+        ]
+    )
+endif
+
+move = custom_target(
     'move',
-    depends: main,
+    depends: strip,
     input: main,
     output: 'none',
     build_by_default: true,
@@ -128,7 +158,7 @@ custom_target(
 
 custom_target(
     'postbuild',
-    depends: main,
+    depends: move,
     input: main,
     output: 'empty',
     build_by_default: true,

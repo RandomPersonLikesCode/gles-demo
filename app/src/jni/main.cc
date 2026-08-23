@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
         ImGui::NewFrame();
 
         // TODO: expand more as needed
-        ImGui::Begin("Button or Smth");
+        ImGui::Begin("Button or What?");
 
         ImGui::SliderInt("Slide me", &value, 0, 10);
         ImGui::Text("Value = %d", value);
