@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: MIT
 precision mediump float;
 
-uniform vec3 col_pick;
+uniform vec3 tri_col;
 
-in vec3 frag_col;
 out vec4 final_col;
 
 void main(void) {
-    final_col = vec4(col_pick, 1.0);
+    final_col = vec4(tri_col, 1.0);
 }

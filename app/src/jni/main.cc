@@ -14,9 +14,9 @@
 #include "./core/shader.hh"
 
 GLfloat verts[] = {
-    0.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-   -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-    1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f
+    0.0f,  1.0f, 0.0f,
+   -1.0f, -1.0f, 0.0f,
+    1.0f, -1.0f, 0.0f
 };
 
 int main(int argc, char *argv[]) {
@@ -54,24 +54,17 @@ int main(int argc, char *argv[]) {
         3,
         GL_FLOAT,
         GL_FALSE,
-        6 * sizeof(GL_FLOAT),
+        3 * sizeof(GL_FLOAT),
         (void*)0
     );
-    glVertexAttribPointer(
-        1,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        6 * sizeof(GL_FLOAT),
-        (void*)(3 * sizeof(GL_FLOAT))
-    );
     glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
 
     Core::Program prog = {};
     prog.create();
+
+    const GLuint tri_color = glGetUniformLocation(prog.handle, "tri_col");
 
     float color[] = {1.0f, 1.0f, 1.0f};
     bool is_running = true;
@@ -92,9 +85,9 @@ int main(int argc, char *argv[]) {
         ImGui::NewFrame();
 
         // TODO: expand more as needed
-        ImGui::Begin("Triangle Style");
+        ImGui::Begin("Triangle Properties");
 
-        ImGui::ColorPicker3("Color", color);
+        ImGui::ColorPicker3("Color", color, ImGuiColorEditFlags_NoInputs);
 
         ImGui::End();
 
@@ -103,11 +96,7 @@ int main(int argc, char *argv[]) {
         glUseProgram(prog.handle);
         glBindVertexArray(vao);
 
-        glUniform3fv(
-            glGetUniformLocation(prog.handle, "col_pick"),
-            1,
-            color
-        );
+        glUniform3fv(tri_color, 1, color);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
         ImGui::Render();
