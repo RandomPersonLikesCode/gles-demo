@@ -59,14 +59,6 @@ run_command(
     check: true
 )
 
-message('(Prebuild) Copying libraries')
-run_command(
-    'cp',
-    sdl_root + lib_dir + 'libSDL3.so',
-    '.build/lib/' + lib_dir,
-    check: true
-)
-
 message('(Prebuild) Executing other commands')
 run_command('bash', 'scripts/prebuild.bash', check: true)
 
@@ -77,10 +69,13 @@ strip = find_program('strip', required: true)
 cc = meson.get_compiler('cpp')
 
 cpp_static = cc.find_library('c++_static', required: true)
+android = cc.find_library('android', required: true)
+log = cc.find_library('log', required: true)
+egl = cc.find_library('EGL', required: true)
 gl = cc.find_library('GLESv3', required: true)
 sdl = cc.find_library(
     'SDL3',
-    dirs: proj_root + '.build/lib/' + lib_dir,
+    dirs: proj_root + sdl_root + lib_dir,
     required: true
 )
 
@@ -112,6 +107,9 @@ main = executable(
     ],
     dependencies: [
         cpp_static,
+        android,
+        log,
+        egl,
         gl,
         sdl
     ]
@@ -144,14 +142,14 @@ else
     )
 endif
 
-move = custom_target(
-    'move',
+copy = custom_target(
+    'copy',
     depends: strip,
     input: main,
     output: 'none',
     build_by_default: true,
     command: [
-        'mv',
+        'cp',
         '@INPUT@',
         '../lib/' + lib_dir
     ]
@@ -159,7 +157,7 @@ move = custom_target(
 
 custom_target(
     'postbuild',
-    depends: move,
+    depends: copy,
     input: main,
     output: 'empty',
     build_by_default: true,

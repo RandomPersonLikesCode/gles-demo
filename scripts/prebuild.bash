@@ -4,7 +4,7 @@ set -eu
 min_api="26"
 sdk_level="35"
 sdk="$ANDROID_HOME/platforms/android-$sdk_level/android.jar"
-sdl="app/src/java/third_party/SDL3/libSDL3.jar"
+sdl="app/src/java/third_party/SDL3/SDL3.jar"
 
 find app/src -name "*.java" > .build/java_src.txt
 
