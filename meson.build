@@ -88,7 +88,6 @@ sources = files(
     jni_root + 'main.cc',
     jni_root + 'core/display.cc',
     jni_root + 'core/shader.cc',
-    jni_root + 'core/shader.cc',
     jni_root + 'core/gui.cc',
     jni_root + 'core/buffers.cc',
     jni_root + 'core/texture.cc',

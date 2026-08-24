@@ -31,7 +31,7 @@ void Core::load_shader(
         LOG_ERR("GL shader error: %s", msg_buff);
     }
 
-    SDL_free(static_cast<void*>(src));
+    SDL_free(src);
 }
 
 void Core::Program::create(void) {
