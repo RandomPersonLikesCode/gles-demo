@@ -31,11 +31,22 @@ void Core::Buffers::create(void) {
         3,
         GL_FLOAT,
         GL_FALSE,
-        3 * sizeof(GL_FLOAT),
-        0
+        5 * sizeof(GL_FLOAT),
+        (void*)0
+    );
+
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        5 * sizeof(GL_FLOAT),
+        (void*)(3 * sizeof(GL_FLOAT))
     );
 
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
     glBindVertexArray(0);
 }
 
