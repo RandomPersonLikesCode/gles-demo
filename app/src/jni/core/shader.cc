@@ -7,7 +7,7 @@
 #include "./shader.hh"
 #include "../utils/logging.hh"
 
-bool Core::load_shader(
+void Core::load_shader(
     const char *path,
     GLenum type,
     GLuint &out
@@ -16,7 +16,7 @@ bool Core::load_shader(
 
     if (!src) {
         LOG_ERR("SDL error: %s", SDL_GetError());
-        return false;
+        return;
     }
 
     out = glCreateShader(type);
@@ -29,15 +29,12 @@ bool Core::load_shader(
         char msg_buff[512] = "";
         glGetShaderInfoLog(out, sizeof(msg_buff), nullptr, msg_buff);
         LOG_ERR("GL shader error: %s", msg_buff);
-        return false;
     }
 
     SDL_free(static_cast<void*>(src));
-    return true;
 }
 
-bool Core::Program::create(void) {
-    // Ignored return value to make sure it does not immediately exit
+void Core::Program::create(void) {
     GLuint vert_shader = 0;
     load_shader("shaders/vert_shader.glsl", GL_VERTEX_SHADER, vert_shader);
 
@@ -64,12 +61,10 @@ bool Core::Program::create(void) {
             msg_buff
         );
         LOG_ERR("GL program error: %s", msg_buff);
-        return false;
     }
 
     glDeleteShader(frag_shader);
     glDeleteShader(vert_shader);
-    return true;
 }
 
 Core::Program::~Program(void) {

@@ -8,7 +8,7 @@
 
 constexpr const char *glsl_ver = "#version 300 es";
 
-bool Core::GUI::create(SDL_Window *window, SDL_GLContext ctx) {
+void Core::GUI::create(SDL_Window *window, SDL_GLContext ctx) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
@@ -19,8 +19,6 @@ bool Core::GUI::create(SDL_Window *window, SDL_GLContext ctx) {
     ImGuiStyle &style = ImGui::GetStyle();
     style.ScaleAllSizes(this->scaling);
     style.FontScaleDpi = this->scaling;
-
-    return true;
 }
 
 Core::GUI::~GUI(void) {

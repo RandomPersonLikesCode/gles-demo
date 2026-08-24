@@ -9,18 +9,10 @@
 #include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include "./core/buffers.hh"
 #include "./core/display.hh"
 #include "./core/gui.hh"
 #include "./core/shader.hh"
-
-GLfloat verts[] = {
-   -0.5f,  1.0f, 0.0f,
-   -1.0f, -1.0f, 0.0f,
-    0.0f, -1.0f, 0.0f,
-    0.5f,  1.0f, 0.0f,
-    0.0f, -1.0f, 0.0f,
-    1.0f, -1.0f, 0.0f
-};
 
 int main(int argc, char *argv[]) {
     (void)argc;
@@ -40,29 +32,8 @@ int main(int argc, char *argv[]) {
 
     gui.create(display.window, display.renderer_ctx);
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glEnable(GL_DEPTH_TEST);
-
-    GLuint vao = 0;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    GLuint vbo = 0;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(
-        0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        3 * sizeof(GL_FLOAT),
-        (void*)0
-    );
-    glEnableVertexAttribArray(0);
-
-    glBindVertexArray(0);
+    Core::Buffers rectangle = {};
+    rectangle.create();
 
     Core::Program prog = {};
     prog.create();
@@ -88,27 +59,23 @@ int main(int argc, char *argv[]) {
         ImGui::NewFrame();
 
         // TODO: expand more as needed
-        ImGui::Begin("Triangle Properties");
-
+        ImGui::Begin("Properties");
         ImGui::ColorPicker3("Color", color, ImGuiColorEditFlags_NoInputs);
-
         ImGui::End();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(prog.handle);
-        glBindVertexArray(vao);
+        glBindVertexArray(rectangle.vao);
 
         glUniform3fv(tri_color, 1, color);
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         SDL_GL_SwapWindow(display.window);
     }
 
-    glDeleteBuffers(1, &vbo);
-    glDeleteVertexArrays(1, &vao);
     return 0;
 }
