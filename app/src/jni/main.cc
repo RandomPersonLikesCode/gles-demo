@@ -14,8 +14,11 @@
 #include "./core/shader.hh"
 
 GLfloat verts[] = {
-    0.0f,  1.0f, 0.0f,
+   -0.5f,  1.0f, 0.0f,
    -1.0f, -1.0f, 0.0f,
+    0.0f, -1.0f, 0.0f,
+    0.5f,  1.0f, 0.0f,
+    0.0f, -1.0f, 0.0f,
     1.0f, -1.0f, 0.0f
 };
 
@@ -98,7 +101,7 @@ int main(int argc, char *argv[]) {
 
         glUniform3fv(tri_color, 1, color);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

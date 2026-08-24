@@ -7,45 +7,46 @@
 #include "./shader.hh"
 #include "../utils/logging.hh"
 
-bool Core::Program::load_shader(
+bool Core::load_shader(
     const char *path,
     GLenum type,
-    GLuint *out
+    GLuint &out
 ) {
-    const char *src = static_cast<const char*>(SDL_LoadFile(path, nullptr));
+    char *src = static_cast<const char*>(SDL_LoadFile(path, nullptr));
 
     if (!src) {
         LOG_ERR("SDL error: %s", SDL_GetError());
         return false;
     }
 
-    *out = glCreateShader(type);
-    glShaderSource(*out, 1, &src, nullptr);
-    glCompileShader(*out);
+    out = glCreateShader(type);
+    glShaderSource(out, 1, &src, nullptr);
+    glCompileShader(out);
 
     GLint is_ok = 0;
-    glGetShaderiv(*out, GL_COMPILE_STATUS, &is_ok);
+    glGetShaderiv(out, GL_COMPILE_STATUS, &is_ok);
     if (is_ok != GL_TRUE) {
         char msg_buff[512] = "";
-        glGetShaderInfoLog(*out, sizeof(msg_buff), nullptr, msg_buff);
+        glGetShaderInfoLog(out, sizeof(msg_buff), nullptr, msg_buff);
         LOG_ERR("GL shader error: %s", msg_buff);
         return false;
     }
 
-    SDL_free((void*)src);
+    SDL_free(static_cast<void*>(src));
     return true;
 }
 
 bool Core::Program::create(void) {
-    // Ignored return value to make sure it does not exit
+    // Ignored return value to make sure it does not immediately exit
+    bool load_shader(const char *path, GLenum type, GLuint *out);
     GLuint vert_shader = 0;
-    load_shader("shaders/vert_shader.glsl", GL_VERTEX_SHADER, &vert_shader);
+    load_shader("shaders/vert_shader.glsl", GL_VERTEX_SHADER, vert_shader);
 
     GLuint frag_shader = 0;
     load_shader(
         "shaders/frag_shader.glsl",
         GL_FRAGMENT_SHADER,
-        &frag_shader
+        frag_shader
     );
 
     this->handle = glCreateProgram();
