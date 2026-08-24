@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+#define STB_IMAGE_IMPLEMENTATION
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
@@ -9,10 +11,15 @@
 #include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include "stb_image.h"
+
 #include "./core/buffers.hh"
 #include "./core/display.hh"
 #include "./core/gui.hh"
 #include "./core/shader.hh"
+#include "./core/texture.hh"
+
+constexpr char const *tex_path = "textures/rusty_metal/base.png";
 
 int main(int argc, char *argv[]) {
     (void)argc;
@@ -38,9 +45,12 @@ int main(int argc, char *argv[]) {
     Core::Program prog = {};
     prog.create();
 
-    const GLuint tri_color = glGetUniformLocation(prog.handle, "tri_col");
+    Core::Texture tex = {};
+    tex.create(tex_path);
 
-    float color[] = {1.0f, 1.0f, 1.0f};
+    const GLuint bright_fac = glGetUniformLocation(prog.handle, "bright_fac");
+
+    float bright = 1.0f;
     bool is_running = true;
     while (is_running) {
         SDL_Event events = {};
@@ -60,15 +70,21 @@ int main(int argc, char *argv[]) {
 
         // TODO: expand more as needed
         ImGui::Begin("Properties");
-        ImGui::ColorPicker3("Color", color, ImGuiColorEditFlags_NoInputs);
+
+        ImGui::SliderFloat("Brightness", &bright, 0.0f, 1.0f, "%.2f");
+
+        ImGui::Text("Texture");
+        ImGui::Text("path: %s", tex_path);
+
         ImGui::End();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(prog.handle);
+        glBindTexture(GL_TEXTURE_2D, tex.handle);
         glBindVertexArray(rectangle.vao);
-
-        glUniform3fv(tri_color, 1, color);
+        
+        glUniform1f(bright_fac, bright);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         ImGui::Render();

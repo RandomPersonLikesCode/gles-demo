@@ -10,11 +10,11 @@ namespace Core {
         GLuint vbo = 0;
         GLuint ebo = 0;
 
-        GLfloat vertices[12] = {
-            -1.0f,  1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,
-             1.0f, -1.0f, 0.0f,
-             1.0f,  1.0f, 0.0f
+        GLfloat vertices[20] = {
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f
         };
 
         GLuint indices[6] = {

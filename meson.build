@@ -17,6 +17,9 @@ project(
     ]
 )
 
+add_project_arguments('-ffunction-sections', '-fdata-sections', language: 'cpp')
+add_project_link_arguments('-Wl,--gc-sections', language: 'cpp')
+
 # Common dirs
 
 proj_root = meson.current_source_dir() + '/'
@@ -88,6 +91,7 @@ sources = files(
     jni_root + 'core/shader.cc',
     jni_root + 'core/gui.cc',
     jni_root + 'core/buffers.cc',
+    jni_root + 'core/texture.cc',
     imgui_root + 'imgui.cpp',
     imgui_root + 'imgui_draw.cpp',
     imgui_root + 'imgui_impl_opengl3.cpp',

@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT
 precision mediump float;
 
-uniform vec3 tri_col;
+uniform float bright_fac;
+uniform sampler2D tex;
 
+in vec2 tex_coord;
 out vec4 final_col;
 
 void main(void) {
-    final_col = vec4(tri_col, 1.0);
+    final_col = texture(tex, tex_coord) * bright_fac;
 }
