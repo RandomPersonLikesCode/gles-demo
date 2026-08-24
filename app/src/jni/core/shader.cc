@@ -12,7 +12,7 @@ bool Core::load_shader(
     GLenum type,
     GLuint &out
 ) {
-    char *src = static_cast<const char*>(SDL_LoadFile(path, nullptr));
+    char *src = static_cast<char*>(SDL_LoadFile(path, nullptr));
 
     if (!src) {
         LOG_ERR("SDL error: %s", SDL_GetError());
@@ -38,7 +38,6 @@ bool Core::load_shader(
 
 bool Core::Program::create(void) {
     // Ignored return value to make sure it does not immediately exit
-    bool load_shader(const char *path, GLenum type, GLuint *out);
     GLuint vert_shader = 0;
     load_shader("shaders/vert_shader.glsl", GL_VERTEX_SHADER, vert_shader);
 
