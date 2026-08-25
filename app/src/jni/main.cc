@@ -21,6 +21,7 @@
 
 constexpr const char *metal = "textures/rusty_metal/base.png";
 constexpr const char *brick = "textures/brick_wall/base.png";
+constexpr const char *test = "textures/test.png";
 
 int main(int argc, char *argv[]) {
     (void)argc;
@@ -46,27 +47,31 @@ int main(int argc, char *argv[]) {
     Core::Program prog = {};
     prog.create();
 
+    stbi_set_flip_vertically_on_load(true);
+
     Core::Texture rusty_metal = {};
     rusty_metal.create(metal);
 
     Core::Texture brick_wall = {};
     brick_wall.create(brick);
 
-    const GLuint bright_fac = glGetUniformLocation(
-        prog.handle,
-        "bright_fac"
-    );
-    const GLuint base_tex = glGetUniformLocation(
-        prog.handle,
-        "base_tex"
-    );
+    Core::Texture test_tex = {};
+    test_tex.create(test);
+
+    const GLuint bright_fac = prog.get_uniform("bright_fac");
+    const GLuint base_tex = prog.get_uniform("base_tex");
 
     float bright = 1.0f;
     bool is_running = true;
 
-    const char *textures[] = {metal, brick};
-    const GLuint tex_handles[] = {rusty_metal.handle, brick_wall.handle};
-    const char *display_items[] = {"Rusty metal", "Brick wall"};
+    const GLuint tex_handles[] = {
+        rusty_metal.handle,
+        brick_wall.handle,
+        test_tex.handle
+    };
+
+    const char *textures[] = {metal, brick, test};
+    const char *display_items[] = {"Rusty metal", "Brick wall", "Test"};
     int selected = 0;
 
     while (is_running) {
