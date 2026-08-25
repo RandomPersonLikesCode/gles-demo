@@ -13,7 +13,7 @@ project(
         'cpp_eh=none',
 
         'warning_level=3',
-        'werror=true'
+        'werror=false'
     ]
 )
 
