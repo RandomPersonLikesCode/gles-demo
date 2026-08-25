@@ -19,8 +19,8 @@
 #include "./core/shader.hh"
 #include "./core/texture.hh"
 
-constexpr char const *metal = "textures/rusty_metal/base.png";
-constexpr char const *brick = "textures/brick_wall/base.png";
+constexpr const char *metal = "textures/rusty_metal/base.png";
+constexpr const char *brick = "textures/brick_all/base.png";
 
 int main(int argc, char *argv[]) {
     (void)argc;
