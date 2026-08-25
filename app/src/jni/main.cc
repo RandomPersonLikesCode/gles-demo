@@ -19,7 +19,8 @@
 #include "./core/shader.hh"
 #include "./core/texture.hh"
 
-constexpr char const *tex_path = "textures/rusty_metal/base.png";
+constexpr char const *metal = "textures/rusty_metal/base.png";
+constexpr char const *brick = "textures/brick_wall/base.png";
 
 int main(int argc, char *argv[]) {
     (void)argc;
@@ -45,13 +46,29 @@ int main(int argc, char *argv[]) {
     Core::Program prog = {};
     prog.create();
 
-    Core::Texture tex = {};
-    tex.create(tex_path);
+    Core::Texture rusty_metal = {};
+    rusty_metal.create(metal);
 
-    const GLuint bright_fac = glGetUniformLocation(prog.handle, "bright_fac");
+    Core::Texture brick_wall = {};
+    brick_wall.create(brick);
+
+    const GLuint bright_fac = glGetUniformLocation(
+        prog.handle,
+        "bright_fac"
+    );
+    const GLuint base_tex = glGetUniformLocation(
+        prog.handle,
+        "base_tex"
+    );
 
     float bright = 1.0f;
     bool is_running = true;
+
+    const char *textures[] = {metal, brick};
+    const GLuint tex_handles[] = {rusty_metal.handle, brick_wall.handle};
+    const char *display_items[] = {"Rusty metal", "Brick wall"};
+    int selected = 0;
+
     while (is_running) {
         SDL_Event events = {};
 
@@ -71,20 +88,32 @@ int main(int argc, char *argv[]) {
         // TODO: expand more as needed
         ImGui::Begin("Properties");
 
+        ImGui::Combo(
+            "Texture selection",
+            &selected,
+            display_items,
+            IM_ARRAYSIZE(display_items)
+        );
+
         ImGui::SliderFloat("Brightness", &bright, 0.0f, 1.0f, "%.2f");
 
         ImGui::Text("Texture");
-        ImGui::Text("path: %s", tex_path);
+
+        ImGui::Text("path: %s", textures[selected]);
 
         ImGui::End();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(prog.handle);
-        glBindTexture(GL_TEXTURE_2D, tex.handle);
         glBindVertexArray(rectangle.vao);
         
         glUniform1f(bright_fac, bright);
+        glUniform1i(base_tex, 0);
+
+        glActiveTexture(GL_TEXTURE0);
+
+        glBindTexture(GL_TEXTURE_2D, tex_handles[selected]);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         ImGui::Render();
