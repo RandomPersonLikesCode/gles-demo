@@ -76,6 +76,7 @@ android = cc.find_library('android', required: true)
 log = cc.find_library('log', required: true)
 egl = cc.find_library('EGL', required: true)
 gl = cc.find_library('GLESv3', required: true)
+sl = cc.find_library('OpenSLES', required: true)
 sdl = cc.find_library(
     'SDL3',
     dirs: proj_root + sdl_root + lib_dir,
@@ -115,6 +116,7 @@ main = executable(
         log,
         egl,
         gl,
+        sl,
         sdl
     ]
 )
