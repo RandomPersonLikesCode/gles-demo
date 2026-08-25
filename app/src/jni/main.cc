@@ -66,7 +66,6 @@ int main(int argc, char *argv[]) {
     const GLuint base_tex = prog.get_uniform("base_tex");
 
     float bright = 1.0f;
-    bool is_running = true;
 
     const GLuint tex_handles[] = {
         rusty_metal.handle,
@@ -80,6 +79,8 @@ int main(int argc, char *argv[]) {
 
     glm::vec2 pos(1.0f, 5.0f);
 
+    bool is_running = true;
+    bool show_exit = false;
     while (is_running) {
         SDL_Event events = {};
 
@@ -89,6 +90,12 @@ int main(int argc, char *argv[]) {
             switch (events.type) {
                 case SDL_EVENT_QUIT:
                     is_running = false;
+                    break;
+                case SDL_EVENT_KEY_UP:
+                    if (events.key.scancode == SDL_SCANCODE_AC_BACK) {
+                        show_exit = true;
+                    }
+
                     break;
             }
         }
@@ -109,14 +116,28 @@ int main(int argc, char *argv[]) {
         ImGui::SliderFloat("Brightness", &bright, 0.0f, 1.0f, "%.2f");
 
         ImGui::Text("Texture");
-
         ImGui::Text("path: %s", textures[selected]);
 
         ImGui::Text("Position");
-
         ImGui::Text("pos: (%.2f, %.2f)", pos.x, pos.y);
 
         ImGui::End();
+
+        if (show_exit) {
+            ImGui::Begin("Exit?");
+            if (ImGui::Button("Yes")) {
+                show_exit = false;
+                is_running = false;
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("No")) {
+                show_exit = false;
+            }
+
+            ImGui::End();
+        }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

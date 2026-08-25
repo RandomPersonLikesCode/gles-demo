@@ -6,6 +6,7 @@
 #include "../utils/logging.hh"
 
 bool Core::Display::create(void) {
+    SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
     SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
