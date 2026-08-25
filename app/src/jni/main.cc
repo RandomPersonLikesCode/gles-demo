@@ -20,7 +20,7 @@
 #include "./core/texture.hh"
 
 constexpr const char *metal = "textures/rusty_metal/base.png";
-constexpr const char *brick = "textures/brick_all/base.png";
+constexpr const char *brick = "textures/brick_wall/base.png";
 
 int main(int argc, char *argv[]) {
     (void)argc;
