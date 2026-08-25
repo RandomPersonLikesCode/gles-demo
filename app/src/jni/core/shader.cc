@@ -70,3 +70,7 @@ void Core::Program::create(void) {
 Core::Program::~Program(void) {
     glDeleteProgram(this->handle);
 }
+
+GLuint Core::Program::get_uniform(const char *name) {
+    return glGetUniformLocation(this->handle, name);
+}

@@ -12,5 +12,7 @@ namespace Core {
 
         void create(void);
         ~Program(void);
+
+        GLuint get_uniform(const char *name);
     };
 }
