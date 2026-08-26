@@ -28,14 +28,14 @@ endian = 'little'
 
 [constants]
 api_level = '35'
-ndk = '<ndk root path>'
-ndk_bin = ndk + '<ndk root path>/toolchains/llvm/prebuilt/linux-x86_64/bin/'
+ndk = '<ndk root path>/'
+ndk_bin = ndk + 'toolchains/llvm/prebuilt/linux-x86_64/bin/'
 
 [binaries]
 ar = ndk_bin + 'llvm-ar'
 as = ndk_bin + 'llvm-as'
-c = ndk_bin + ' <aarch64|arm>-linux-android' + api_level + '-clang'
-cpp = ndk_bin + '<aarch64|arm>-linux-android' + api_level + '-clang++'
+c = ndk_bin + ' <aarch64|arm>-linux-<android|androideabi>' + api_level + '-clang'
+cpp = ndk_bin + '<aarch64|arm>-linux-<android|androideabi>' + api_level + '-clang++'
 ld = ndk_bin + 'ld'
 ranlib = ndk_bin + 'llvm-ranlib'
 strip = ndk_bin + 'llvm-strip'
