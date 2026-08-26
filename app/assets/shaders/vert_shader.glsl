@@ -9,6 +9,6 @@ layout (location = 1) in vec2 org_tex_coord;
 out vec2 tex_coord;
 
 void main(void) {
-    gl_Position = vec4(org_pos * 0.5, 1.0);
+    gl_Position = vec4(org_pos.x * 0.5, org_pos.yz, 1.0);
     tex_coord = org_tex_coord;
 }
