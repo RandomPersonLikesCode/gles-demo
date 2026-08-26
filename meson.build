@@ -1,5 +1,5 @@
 project(
-    'sdl-demo',
+    'gles-demo',
     'cpp',
 
     version: '1.0.0',
