@@ -7,10 +7,6 @@
 
 #include <GLES3/gl32.h>
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -77,8 +73,6 @@ int main(int argc, char *argv[]) {
     const char *display_items[] = {"Rusty metal", "Brick wall", "Test"};
     int selected = 0;
 
-    glm::vec2 pos(1.0f, 5.0f);
-
     bool is_running = true;
     bool show_exit = false;
     while (is_running) {
@@ -117,9 +111,6 @@ int main(int argc, char *argv[]) {
 
         ImGui::Text("Texture");
         ImGui::Text("path: %s", textures[selected]);
-
-        ImGui::Text("Position");
-        ImGui::Text("pos: (%.2f, %.2f)", pos.x, pos.y);
 
         ImGui::End();
 

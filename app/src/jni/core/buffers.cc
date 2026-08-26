@@ -31,7 +31,7 @@ void Core::Buffers::create(void) {
         3,
         GL_FLOAT,
         GL_FALSE,
-        5 * sizeof(GL_FLOAT),
+        5 * sizeof(GLfloat),
         (void*)0
     );
 
@@ -40,8 +40,8 @@ void Core::Buffers::create(void) {
         2,
         GL_FLOAT,
         GL_FALSE,
-        5 * sizeof(GL_FLOAT),
-        (void*)(3 * sizeof(GL_FLOAT))
+        5 * sizeof(GLfloat),
+        (void*)(3 * sizeof(GLfloat))
     );
 
     glEnableVertexAttribArray(0);
