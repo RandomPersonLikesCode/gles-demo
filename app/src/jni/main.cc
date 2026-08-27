@@ -10,9 +10,13 @@
 
 #include <new>
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 #include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
+#include "imgui/imgui_impl_sdl3.h"
 
 #include "stb_image.h"
 
@@ -24,115 +28,140 @@
 #include "./core/shader.hh"
 #include "./core/texture.hh"
 
-GLuint bright_fac = 0;
-GLuint base_tex = 0;
-float brightness = 1.0f;
-bool show_exit = false;
+float rot_speed = 100.0f;
+float fov = 45.0f;
+float t = 1.0f;
 
-long long unsigned int counter = 0;
+float aspect = 0.0f;
 
-SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
-    App::AppState *state = new (std::nothrow) App::AppState();
+Uint64 last = 0;
 
-    if (!state) {
-        return SDL_APP_FAILURE;
-    }
+glm::mat4 model(1.0f);
+glm::mat4 view(1.0f);
+glm::mat4 projection(1.0f);
 
-    state->dp.title = "OpenGL ES Demo";
-    if (!state->dp.create()) {
-        return SDL_APP_FAILURE;
-    }
+const float cam_speed = 100.0f;
 
-    state->gui.scaling = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
-    state->gui.create(state->dp.window, state->dp.renderer_ctx);
+SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
+  App::AppState* state = new (std::nothrow) App::AppState();
+  stbi_set_flip_vertically_on_load(true);
 
-    state->rect.create();
-    state->prog.create();
+  if (!state) {
+    return SDL_APP_FAILURE;
+  }
 
-    stbi_set_flip_vertically_on_load(true);
-    state->test.create(App::test);
+  if (!state->dp.create()) {
+    return SDL_APP_FAILURE;
+  }
 
-    bright_fac = state->prog.get_uniform("bright_fac");
-    base_tex = state->prog.get_uniform("base_tex");
+  state->gui.create(state->dp.window, state->dp.renderer_ctx);
+  state->rect.create();
+  state->prog.create();
+  state->tex.create(App::metal);
 
-    *appstate = state;
-    return SDL_APP_CONTINUE;
+  aspect = static_cast<float>(state->dp.width) / state->dp.height;
+
+  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+  last = SDL_GetTicksNS();
+
+  *appstate = state;
+  return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_AppIterate(void *appstate) {
-    App::AppState *state = static_cast<App::AppState*>(appstate);
+SDL_AppResult SDL_AppIterate(void* appstate) {
+  App::AppState* state = static_cast<App::AppState*>(appstate);
 
-    counter++;
+  Uint64 current = SDL_GetTicksNS();
 
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL3_NewFrame();
-    ImGui::NewFrame();
+  double dt = static_cast<double>((current - last)) / SDL_NS_PER_SECOND;
 
-    ImGui::Begin("Properties");
+  last = current;
 
-    ImGui::SliderFloat("Brightness", &brightness, 0.0f, 1.0f, "%.2f");
-    ImGui::Text("Counter: %llu", counter);
+  t += rot_speed * dt;
+
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplSDL3_NewFrame();
+  ImGui::NewFrame();
+
+  ImGui::Begin("Properties");
+
+  ImGui::SliderFloat("Rotation speed", &rot_speed, 0.0f, 1000.0f);
+  ImGui::SliderFloat("FOV", &fov, 0.0f, 180.0f);
+
+  ImGui::End();
+
+  if (state->show_exit_panel) {
+    ImGui::Begin("Exit?");
+    if (ImGui::Button("Yes")) {
+      state->show_exit_panel = false;
+      return SDL_APP_SUCCESS;
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("No")) {
+      state->show_exit_panel = false;
+    }
 
     ImGui::End();
+  }
 
-    if (show_exit) {
-        ImGui::Begin("Exit?");
-        if (ImGui::Button("Yes")) {
-            show_exit = false;
-            return SDL_APP_SUCCESS;
-        }
+  projection = glm::perspective(glm::radians(fov), aspect, 0.1f, 100.0f);
+  model = glm::rotate(glm::mat4(1.0f), glm::radians(t),
+                      glm::vec3(1.0f, 0.5f, 0.3f));
 
-        ImGui::SameLine();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (ImGui::Button("No")) {
-            show_exit = false;
-        }
+  glUseProgram(state->prog.handle);
+  glBindVertexArray(state->rect.vao);
 
-        ImGui::End();
-    }
+  glUniform1i(state->prog.uniforms.base_tex, 0);
+  glUniformMatrix4fv(state->prog.uniforms.model, 1, GL_FALSE,
+                     glm::value_ptr(model));
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glUniformMatrix4fv(state->prog.uniforms.view, 1, GL_FALSE,
+                     glm::value_ptr(view));
 
-    glUseProgram(state->prog.handle);
-    glBindVertexArray(state->rect.vao);
+  glUniformMatrix4fv(state->prog.uniforms.projection, 1, GL_FALSE,
+                     glm::value_ptr(projection));
 
-    glUniform1f(bright_fac, brightness);
-    glUniform1i(base_tex, 0);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, state->tex.handle);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, state->test.handle);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    SDL_GL_SwapWindow(state->dp.window);
-    return SDL_APP_CONTINUE;
+  SDL_GL_SwapWindow(state->dp.window);
+  return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
-    ImGui_ImplSDL3_ProcessEvent(event);
+SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
+  App::AppState* state = static_cast<App::AppState*>(appstate);
+  ImGui_ImplSDL3_ProcessEvent(event);
 
-    switch (event->type) {
-        case SDL_EVENT_QUIT:
-            return SDL_APP_SUCCESS;
+  switch (event->type) {
+    case SDL_EVENT_QUIT:
+      return SDL_APP_SUCCESS;
 
-            break;
-        case SDL_EVENT_KEY_UP:
-            if (event->key.scancode == SDL_SCANCODE_AC_BACK) {
-                show_exit = true;
-            }
+      break;
+    case SDL_EVENT_KEY_UP:
+      if (event->key.scancode == SDL_SCANCODE_AC_BACK) {
+        state->show_exit_panel = true;
+      }
 
-            break;
-    }
+      break;
+  }
 
-    return SDL_APP_CONTINUE;
+  return SDL_APP_CONTINUE;
 }
 
-void SDL_AppQuit(void *appstate, SDL_AppResult result) {
-    if (appstate) {
-        App::AppState *state = static_cast<App::AppState*>(appstate);
+void SDL_AppQuit(void* appstate, SDL_AppResult result) {
+  if (appstate) {
+    App::AppState* state = static_cast<App::AppState*>(appstate);
 
-        delete state;
-    }
+    delete state;
+  }
 }

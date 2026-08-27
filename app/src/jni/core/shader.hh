@@ -5,14 +5,21 @@
 #include <GLES3/gl32.h>
 
 namespace Core {
-    void load_shader(const char *path, GLenum type, GLuint &out);
+  void load_shader(const char* path, GLenum type, GLuint& out);
 
-    struct Program {
-        GLuint handle = 0;
+  struct Program {
+    GLuint handle;
 
-        void create(void);
-        ~Program(void);
+    struct Uniforms {
+      GLuint base_tex;
+      GLuint model;
+      GLuint view;
+      GLuint projection;
+    } uniforms;
 
-        GLuint get_uniform(const char *name);
-    };
-}
+    void create(void);
+    ~Program(void);
+
+    GLuint get_uniform(const char* name);
+  };
+}  // namespace Core
