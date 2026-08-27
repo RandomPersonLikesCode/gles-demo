@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+#define SDL_MAIN_USE_CALLBACKS
 #define STB_IMAGE_IMPLEMENTATION
 
 #include <SDL3/SDL.h>
@@ -7,11 +8,15 @@
 
 #include <GLES3/gl32.h>
 
+#include <new>
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "stb_image.h"
+
+#include "./app_state.hh"
 
 #include "./core/buffers.hh"
 #include "./core/display.hh"
@@ -19,135 +24,115 @@
 #include "./core/shader.hh"
 #include "./core/texture.hh"
 
-constexpr const char *metal = "textures/rusty_metal/base.png";
-constexpr const char *brick = "textures/brick_wall/base.png";
-constexpr const char *test = "textures/test.png";
+GLuint bright_fac = 0;
+GLuint base_tex = 0;
+float brightness = 1.0f;
+bool show_exit = false;
 
-int main(int argc, char *argv[]) {
-    (void)argc;
-    (void)argv;
+long long unsigned int counter = 0;
 
-    Core::Display display = {
-        .title = "SDL Demo",
-    };
+SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
+    App::AppState *state = new (std::nothrow) App::AppState();
 
-    if (!display.create()) {
-        return 1;
+    if (!state) {
+        return SDL_APP_FAILURE;
     }
 
-    Core::GUI gui = {
-        .scaling = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay()) - 0.5f
-    };
+    state->dp.title = "OpenGL ES Demo";
+    if (!state->dp.create()) {
+        return SDL_APP_FAILURE;
+    }
 
-    gui.create(display.window, display.renderer_ctx);
+    state->gui.scaling = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
+    state->gui.create(state->dp.window, state->dp.renderer_ctx);
 
-    Core::Buffers rectangle = {};
-    rectangle.create();
-
-    Core::Program prog = {};
-    prog.create();
+    state->rect.create();
+    state->prog.create();
 
     stbi_set_flip_vertically_on_load(true);
+    state->test.create(App::test);
 
-    Core::Texture rusty_metal = {};
-    rusty_metal.create(metal);
+    bright_fac = state->prog.get_uniform("bright_fac");
+    base_tex = state->prog.get_uniform("base_tex");
 
-    Core::Texture brick_wall = {};
-    brick_wall.create(brick);
+    *appstate = state;
+    return SDL_APP_CONTINUE;
+}
 
-    Core::Texture test_tex = {};
-    test_tex.create(test);
+SDL_AppResult SDL_AppIterate(void *appstate) {
+    App::AppState *state = static_cast<App::AppState*>(appstate);
 
-    const GLuint bright_fac = prog.get_uniform("bright_fac");
-    const GLuint base_tex = prog.get_uniform("base_tex");
+    counter++;
 
-    float bright = 1.0f;
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
 
-    const GLuint tex_handles[] = {
-        rusty_metal.handle,
-        brick_wall.handle,
-        test_tex.handle
-    };
+    ImGui::Begin("Properties");
 
-    const char *textures[] = {metal, brick, test};
-    const char *display_items[] = {"Rusty metal", "Brick wall", "Test"};
-    int selected = 0;
+    ImGui::SliderFloat("Brightness", &brightness, 0.0f, 1.0f, "%.2f");
+    ImGui::Text("Counter: %llu", counter);
 
-    bool is_running = true;
-    bool show_exit = false;
-    while (is_running) {
-        SDL_Event events = {};
+    ImGui::End();
 
-        while (SDL_PollEvent(&events)) {
-            ImGui_ImplSDL3_ProcessEvent(&events);
-
-            switch (events.type) {
-                case SDL_EVENT_QUIT:
-                    is_running = false;
-                    break;
-                case SDL_EVENT_KEY_UP:
-                    if (events.key.scancode == SDL_SCANCODE_AC_BACK) {
-                        show_exit = true;
-                    }
-
-                    break;
-            }
+    if (show_exit) {
+        ImGui::Begin("Exit?");
+        if (ImGui::Button("Yes")) {
+            show_exit = false;
+            return SDL_APP_SUCCESS;
         }
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
 
-        // TODO: expand more as needed
-        ImGui::Begin("Properties");
+        ImGui::SameLine();
 
-        ImGui::Combo(
-            "Texture selection",
-            &selected,
-            display_items,
-            IM_ARRAYSIZE(display_items)
-        );
-
-        ImGui::SliderFloat("Brightness", &bright, 0.0f, 1.0f, "%.2f");
-
-        ImGui::Text("Texture");
-        ImGui::Text("path: %s", textures[selected]);
+        if (ImGui::Button("No")) {
+            show_exit = false;
+        }
 
         ImGui::End();
-
-        if (show_exit) {
-            ImGui::Begin("Exit?");
-            if (ImGui::Button("Yes")) {
-                show_exit = false;
-                is_running = false;
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("No")) {
-                show_exit = false;
-            }
-
-            ImGui::End();
-        }
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glUseProgram(prog.handle);
-        glBindVertexArray(rectangle.vao);
-        
-        glUniform1f(bright_fac, bright);
-        glUniform1i(base_tex, 0);
-
-        glActiveTexture(GL_TEXTURE0);
-
-        glBindTexture(GL_TEXTURE_2D, tex_handles[selected]);
-
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        SDL_GL_SwapWindow(display.window);
     }
 
-    return 0;
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(state->prog.handle);
+    glBindVertexArray(state->rect.vao);
+
+    glUniform1f(bright_fac, brightness);
+    glUniform1i(base_tex, 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, state->test.handle);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    SDL_GL_SwapWindow(state->dp.window);
+    return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
+    ImGui_ImplSDL3_ProcessEvent(event);
+
+    switch (event->type) {
+        case SDL_EVENT_QUIT:
+            return SDL_APP_SUCCESS;
+
+            break;
+        case SDL_EVENT_KEY_UP:
+            if (event->key.scancode == SDL_SCANCODE_AC_BACK) {
+                show_exit = true;
+            }
+
+            break;
+    }
+
+    return SDL_APP_CONTINUE;
+}
+
+void SDL_AppQuit(void *appstate, SDL_AppResult result) {
+    if (appstate) {
+        App::AppState *state = static_cast<App::AppState*>(appstate);
+
+        delete state;
+    }
 }

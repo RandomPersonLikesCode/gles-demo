@@ -5,10 +5,10 @@
 #include <SDL3/SDL.h>
 
 namespace Core {
-    struct GUI {
+    struct Gui {
         float scaling = 1.0f;
 
         void create(SDL_Window *window, SDL_GLContext ctx);
-        ~GUI(void);
+        ~Gui(void);
     };
 }
