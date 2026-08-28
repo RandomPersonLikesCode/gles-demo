@@ -9,9 +9,9 @@
 #include "../utils/logging.hh"
 #include "./texture.hh"
 
-void Core::Texture::create(const char* path) {
+void Core::Texture::create(const char *path) {
   size_t size = 0;
-  stbi_uc* data = static_cast<stbi_uc*>(SDL_LoadFile(path, &size));
+  stbi_uc *data = static_cast<stbi_uc *>(SDL_LoadFile(path, &size));
 
   if (!data) {
     LOG_ERR("SDL error: %s", SDL_GetError());
@@ -21,7 +21,7 @@ void Core::Texture::create(const char* path) {
   int height = 0;
   int channels = 0;
 
-  stbi_uc* tex =
+  stbi_uc *tex =
       stbi_load_from_memory(data, size, &width, &height, &channels, 4);
 
   if (!tex) {

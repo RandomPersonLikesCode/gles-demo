@@ -14,10 +14,10 @@ void Core::Buffers::create(void) {
                GL_STATIC_DRAW);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat),
-                        (void*)0);
+                        (void *)0);
 
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat),
-                        (void*)(3 * sizeof(GLfloat)));
+                        (void *)(3 * sizeof(GLfloat)));
 
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);

@@ -8,9 +8,9 @@
 
 #include "./gui.hh"
 
-constexpr const char* glsl_ver = "#version 300 es";
+constexpr const char *glsl_ver = "#version 300 es";
 
-void Core::Gui::create(SDL_Window* window, SDL_GLContext ctx) {
+void Core::Gui::create(SDL_Window *window, SDL_GLContext ctx) {
   float scaling =
       SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay()) - 0.5f;
 
@@ -21,7 +21,7 @@ void Core::Gui::create(SDL_Window* window, SDL_GLContext ctx) {
   ImGui_ImplSDL3_InitForOpenGL(window, ctx);
   ImGui_ImplOpenGL3_Init(glsl_ver);
 
-  ImGuiStyle& style = ImGui::GetStyle();
+  ImGuiStyle &style = ImGui::GetStyle();
   style.ScaleAllSizes(scaling);
   style.FontScaleDpi = scaling;
 }

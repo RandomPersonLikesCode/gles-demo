@@ -10,9 +10,11 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform float cube_size;
+
 out vec2 tex_coord;
 
 void main(void) {
-    gl_Position = projection * view * model * vec4(org_pos * 0.7, 1.0);
+    gl_Position = projection * view * model * vec4(org_pos * cube_size, 1.0);
     tex_coord = org_tex_coord;
 }

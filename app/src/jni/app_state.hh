@@ -19,7 +19,7 @@ namespace App {
     bool show_exit_panel;
   };
 
-  constexpr const char* metal = "textures/rusty_metal/base.png";
-  constexpr const char* wall = "textures/brick_wall/base.png";
-  constexpr const char* test = "textures/test.png";
+  constexpr const char *metal = "textures/rusty_metal/base.png";
+  constexpr const char *wall = "textures/brick_wall/base.png";
+  constexpr const char *test = "textures/test.png";
 }  // namespace App
