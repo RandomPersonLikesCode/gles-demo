@@ -28,8 +28,9 @@
 #include "./core/shader.hh"
 #include "./core/texture.hh"
 
-float rot_speed = 100.0f;
 float fov = 45.0f;
+float brightness = 1.0f;
+float cube_size = 1.0f;
 float t = 1.0f;
 
 float aspect = 0.0f;
@@ -40,10 +41,8 @@ glm::mat4 model(1.0f);
 glm::mat4 view(1.0f);
 glm::mat4 projection(1.0f);
 
-const float cam_speed = 100.0f;
-
-SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
-  App::AppState* state = new (std::nothrow) App::AppState();
+SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
+  App::AppState *state = new (std::nothrow) App::AppState();
   stbi_set_flip_vertically_on_load(true);
 
   if (!state) {
@@ -69,8 +68,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
   return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_AppIterate(void* appstate) {
-  App::AppState* state = static_cast<App::AppState*>(appstate);
+SDL_AppResult SDL_AppIterate(void *appstate) {
+  App::AppState *state = static_cast<App::AppState *>(appstate);
 
   Uint64 current = SDL_GetTicksNS();
 
@@ -78,7 +77,7 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 
   last = current;
 
-  t += rot_speed * dt;
+  t += 100.0f * dt;
 
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplSDL3_NewFrame();
@@ -86,8 +85,9 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 
   ImGui::Begin("Properties");
 
-  ImGui::SliderFloat("Rotation speed", &rot_speed, 0.0f, 1000.0f);
-  ImGui::SliderFloat("FOV", &fov, 0.0f, 180.0f);
+  ImGui::SliderFloat("Perspective FOV", &fov, 0.0f, 180.0f, "%.2f");
+  ImGui::SliderFloat("Brightness", &brightness, 0.0f, 1.0f, "%.2f");
+  ImGui::SliderFloat("Cube size", &cube_size, 0.0f, 1.0f, "%.2f");
 
   ImGui::End();
 
@@ -117,6 +117,8 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
   glBindVertexArray(state->rect.vao);
 
   glUniform1i(state->prog.uniforms.base_tex, 0);
+  glUniform1f(state->prog.uniforms.brightness, brightness);
+  glUniform1f(state->prog.uniforms.cube_size, cube_size);
   glUniformMatrix4fv(state->prog.uniforms.model, 1, GL_FALSE,
                      glm::value_ptr(model));
 
@@ -138,8 +140,8 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
   return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
-  App::AppState* state = static_cast<App::AppState*>(appstate);
+SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
+  App::AppState *state = static_cast<App::AppState *>(appstate);
   ImGui_ImplSDL3_ProcessEvent(event);
 
   switch (event->type) {
@@ -158,9 +160,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
   return SDL_APP_CONTINUE;
 }
 
-void SDL_AppQuit(void* appstate, SDL_AppResult result) {
+void SDL_AppQuit(void *appstate, SDL_AppResult result) {
   if (appstate) {
-    App::AppState* state = static_cast<App::AppState*>(appstate);
+    App::AppState *state = static_cast<App::AppState *>(appstate);
 
     delete state;
   }

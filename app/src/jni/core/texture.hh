@@ -8,7 +8,7 @@ namespace Core {
   struct Texture {
     GLuint handle = 0;
 
-    void create(const char* path);
+    void create(const char *path);
     ~Texture(void);
   };
 }  // namespace Core

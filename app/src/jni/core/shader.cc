@@ -7,8 +7,8 @@
 #include "../utils/logging.hh"
 #include "./shader.hh"
 
-void Core::load_shader(const char* path, GLenum type, GLuint& out) {
-  char* src = static_cast<char*>(SDL_LoadFile(path, nullptr));
+void Core::load_shader(const char *path, GLenum type, GLuint &out) {
+  char *src = static_cast<char *>(SDL_LoadFile(path, nullptr));
 
   if (!src) {
     LOG_ERR("SDL error: %s", SDL_GetError());
@@ -51,6 +51,8 @@ void Core::Program::create(void) {
   }
 
   this->uniforms.base_tex = this->get_uniform("base_tex");
+  this->uniforms.brightness = this->get_uniform("brightness");
+  this->uniforms.cube_size = this->get_uniform("cube_size");
   this->uniforms.model = this->get_uniform("model");
   this->uniforms.view = this->get_uniform("view");
   this->uniforms.projection = this->get_uniform("projection");
@@ -63,6 +65,6 @@ Core::Program::~Program(void) {
   glDeleteProgram(this->handle);
 }
 
-GLuint Core::Program::get_uniform(const char* name) {
+GLuint Core::Program::get_uniform(const char *name) {
   return glGetUniformLocation(this->handle, name);
 }

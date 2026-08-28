@@ -6,10 +6,10 @@
 
 namespace Core {
   struct Display {
-    SDL_Window* window = nullptr;
+    SDL_Window *window = nullptr;
     SDL_GLContext renderer_ctx = nullptr;
 
-    const char* title = "OpenGL ES Demo";
+    const char *title = "OpenGL ES Demo";
     int width = 800;
     int height = 600;
 

@@ -6,7 +6,7 @@
 
 namespace Core {
   struct Gui {
-    void create(SDL_Window* window, SDL_GLContext ctx);
+    void create(SDL_Window *window, SDL_GLContext ctx);
     ~Gui(void);
   };
 }  // namespace Core
