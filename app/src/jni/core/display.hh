@@ -13,6 +13,8 @@ namespace Core {
     int width = 800;
     int height = 600;
 
+    float aspect_ratio = 0.0f;
+
     bool create(void);
     ~Display(void);
   };
