@@ -8,6 +8,7 @@
 
 #include <GLES3/gl32.h>
 
+#include <cmath>
 #include <new>
 
 #include "glm/glm.hpp"
@@ -25,21 +26,11 @@
 #include "./core/buffers.hh"
 #include "./core/display.hh"
 #include "./core/gui.hh"
+#include "./core/mvp.hh"
 #include "./core/shader.hh"
 #include "./core/texture.hh"
 
-float fov = 45.0f;
-float brightness = 1.0f;
-float cube_size = 1.0f;
-float t = 1.0f;
-
-float aspect = 0.0f;
-
 Uint64 last = 0;
-
-glm::mat4 model(1.0f);
-glm::mat4 view(1.0f);
-glm::mat4 projection(1.0f);
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   App::AppState *state = new (std::nothrow) App::AppState();
@@ -57,10 +48,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   state->rect.create();
   state->prog.create();
   state->tex.create(App::metal);
-
-  aspect = static_cast<float>(state->dp.width) / state->dp.height;
-
-  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+  state->mvp.create(state->dp.aspect_ratio);
 
   last = SDL_GetTicksNS();
 
@@ -76,8 +64,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   double dt = static_cast<double>((current - last)) / SDL_NS_PER_SECOND;
 
   last = current;
-
-  t += 100.0f * dt;
+  float cam_speed = state->mvp.cam_speed * dt;
 
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplSDL3_NewFrame();
@@ -85,9 +72,13 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 
   ImGui::Begin("Properties");
 
-  ImGui::SliderFloat("Perspective FOV", &fov, 0.0f, 180.0f, "%.2f");
-  ImGui::SliderFloat("Brightness", &brightness, 0.0f, 1.0f, "%.2f");
-  ImGui::SliderFloat("Cube size", &cube_size, 0.0f, 1.0f, "%.2f");
+  ImGui::Text("Pitch: %.2f", state->mvp.cam_pitch);
+  ImGui::Text("Yaw: %.2f", state->mvp.cam_yaw);
+
+  ImGui::NewLine();
+
+  ImGui::SliderFloat("Look sensitivity", &state->mvp.cam_sensitivity, 0.0f,
+                     1.0f, "%.2f");
 
   ImGui::End();
 
@@ -107,9 +98,13 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     ImGui::End();
   }
 
-  projection = glm::perspective(glm::radians(fov), aspect, 0.1f, 100.0f);
-  model = glm::rotate(glm::mat4(1.0f), glm::radians(t),
-                      glm::vec3(1.0f, 0.5f, 0.3f));
+  if (state->mvp.is_cam_move) {
+    state->mvp.cam_pos += cam_speed * state->mvp.cam_front;
+  }
+
+  state->mvp.view = glm::lookAt(state->mvp.cam_pos,
+                                state->mvp.cam_pos + state->mvp.cam_front,
+                                glm::vec3(0.0f, 1.0f, 0.0f));
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -117,16 +112,14 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   glBindVertexArray(state->rect.vao);
 
   glUniform1i(state->prog.uniforms.base_tex, 0);
-  glUniform1f(state->prog.uniforms.brightness, brightness);
-  glUniform1f(state->prog.uniforms.cube_size, cube_size);
   glUniformMatrix4fv(state->prog.uniforms.model, 1, GL_FALSE,
-                     glm::value_ptr(model));
+                     glm::value_ptr(state->mvp.model));
 
   glUniformMatrix4fv(state->prog.uniforms.view, 1, GL_FALSE,
-                     glm::value_ptr(view));
+                     glm::value_ptr(state->mvp.view));
 
   glUniformMatrix4fv(state->prog.uniforms.projection, 1, GL_FALSE,
-                     glm::value_ptr(projection));
+                     glm::value_ptr(state->mvp.projection));
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, state->tex.handle);
@@ -137,12 +130,18 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   SDL_GL_SwapWindow(state->dp.window);
+
   return SDL_APP_CONTINUE;
 }
 
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
   App::AppState *state = static_cast<App::AppState *>(appstate);
+  ImGuiIO &io = ImGui::GetIO();
+
   ImGui_ImplSDL3_ProcessEvent(event);
+  if (io.WantCaptureMouse || io.WantTextInput) {
+    return SDL_APP_CONTINUE;
+  }
 
   switch (event->type) {
     case SDL_EVENT_QUIT:
@@ -155,6 +154,57 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
       }
 
       break;
+    case SDL_EVENT_FINGER_DOWN:
+      if (event->tfinger.x > 0.5f) {
+        state->mvp.is_cam_move = true;
+      }
+
+      break;
+    case SDL_EVENT_FINGER_UP:
+      state->mvp.is_cam_move = false;
+      state->mvp.is_first_click = true;
+
+      break;
+    case SDL_EVENT_FINGER_MOTION: {
+      float pos_x = event->tfinger.x * state->dp.width;
+      float pos_y = event->tfinger.y * state->dp.height;
+
+      if (event->tfinger.x < 0.5f) {
+        if (state->mvp.is_first_click) {
+          state->mvp.last_pos_x = pos_x;
+          state->mvp.last_pos_y = pos_y;
+
+          state->mvp.is_first_click = false;
+        }
+
+        float offset_x = pos_x - state->mvp.last_pos_x;
+        float offset_y = state->mvp.last_pos_y - pos_y;
+        state->mvp.last_pos_x = pos_x;
+        state->mvp.last_pos_y = pos_y;
+
+        offset_x *= state->mvp.cam_sensitivity;
+        offset_y *= state->mvp.cam_sensitivity;
+
+        state->mvp.cam_yaw += offset_x;
+        state->mvp.cam_pitch += offset_y;
+
+        state->mvp.cam_pitch =
+            glm::clamp(state->mvp.cam_pitch, -89.0f, 89.0f);
+
+        glm::vec3 dir;
+        dir.x = std::cos(glm::radians(state->mvp.cam_yaw)) *
+                std::cos(glm::radians(state->mvp.cam_pitch));
+
+        dir.y = std::sin(glm::radians(state->mvp.cam_pitch));
+
+        dir.z = std::sin(glm::radians(state->mvp.cam_yaw)) *
+                std::cos(glm::radians(state->mvp.cam_pitch));
+
+        state->mvp.cam_front = glm::normalize(dir);
+      }
+    }
+
+    break;
   }
 
   return SDL_APP_CONTINUE;

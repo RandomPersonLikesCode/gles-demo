@@ -12,8 +12,6 @@ namespace Core {
 
     struct Uniforms {
       GLuint base_tex;
-      GLuint brightness;
-      GLuint cube_size;
       GLuint model;
       GLuint view;
       GLuint projection;

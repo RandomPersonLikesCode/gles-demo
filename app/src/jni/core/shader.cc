@@ -51,8 +51,6 @@ void Core::Program::create(void) {
   }
 
   this->uniforms.base_tex = this->get_uniform("base_tex");
-  this->uniforms.brightness = this->get_uniform("brightness");
-  this->uniforms.cube_size = this->get_uniform("cube_size");
   this->uniforms.model = this->get_uniform("model");
   this->uniforms.view = this->get_uniform("view");
   this->uniforms.projection = this->get_uniform("projection");

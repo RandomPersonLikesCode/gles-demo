@@ -33,6 +33,7 @@ bool Core::Display::create(void) {
   }
 
   SDL_GetWindowSizeInPixels(this->window, &this->width, &this->height);
+  this->aspect_ratio = static_cast<float>(this->width) / this->height;
 
   this->renderer_ctx = SDL_GL_CreateContext(this->window);
 
