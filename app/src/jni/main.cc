@@ -2,6 +2,7 @@
 
 #define SDL_MAIN_USE_CALLBACKS
 #define STB_IMAGE_IMPLEMENTATION
+#define M3D_IMPLEMENTATION
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -26,6 +27,7 @@
 #include "./core/buffers.hh"
 #include "./core/display.hh"
 #include "./core/gui.hh"
+#include "./core/model.hh"
 #include "./core/mvp.hh"
 #include "./core/shader.hh"
 #include "./core/texture.hh"
@@ -47,8 +49,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   state->gui.create(state->dp.window, state->dp.renderer_ctx);
   state->rect.create();
   state->prog.create();
-  state->tex.create(App::metal);
   state->mvp.create(state->dp.aspect_ratio);
+  state->tex.create(App::metal);
+  state->teapot.create(App::teapot);
 
   last = SDL_GetTicksNS();
 
@@ -70,15 +73,17 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   ImGui_ImplSDL3_NewFrame();
   ImGui::NewFrame();
 
-  ImGui::Begin("Properties");
+  ImGui::Begin("Model Properties");
 
-  ImGui::Text("Pitch: %.2f", state->mvp.cam_pitch);
-  ImGui::Text("Yaw: %.2f", state->mvp.cam_yaw);
+  ImGui::Text("Path: %s", App::teapot);
+  ImGui::Text("Name: %s", state->teapot.model->name);
+  ImGui::Text("Author: %s", state->teapot.model->author);
+  ImGui::Text("Description: %s", state->teapot.model->desc);
+  ImGui::Text("License: %s", state->teapot.model->license);
 
   ImGui::NewLine();
 
-  ImGui::SliderFloat("Look sensitivity", &state->mvp.cam_sensitivity, 0.0f,
-                     1.0f, "%.2f");
+  ImGui::Text("Vertex count: %u", state->teapot.model->numvertex);
 
   ImGui::End();
 
@@ -155,7 +160,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 
       break;
     case SDL_EVENT_FINGER_DOWN:
-      if (event->tfinger.x > 0.5f) {
+      if (event->tfinger.x < 0.5f) {
         state->mvp.is_cam_move = true;
       }
 
@@ -169,7 +174,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
       float pos_x = event->tfinger.x * state->dp.width;
       float pos_y = event->tfinger.y * state->dp.height;
 
-      if (event->tfinger.x < 0.5f) {
+      if (event->tfinger.x > 0.5f) {
         if (state->mvp.is_first_click) {
           state->mvp.last_pos_x = pos_x;
           state->mvp.last_pos_y = pos_y;

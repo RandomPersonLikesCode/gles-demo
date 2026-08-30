@@ -13,7 +13,7 @@ namespace Core {
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::mat4(1.0f);
 
-    float cam_sensitivity = 0.35f;
+    float cam_sensitivity = 0.2f;
     float cam_speed = 2.5f;
     float cam_pitch = 0.0f;
     float cam_yaw = -90.0f;
