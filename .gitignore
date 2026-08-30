@@ -1,9 +1,7 @@
-.build/
+build/
 .cache/
+.xmake/
 
 *.a
-*.p12
 
-conf.bash
-tags
 compile_commands.json
