@@ -71,7 +71,10 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   ImGui_ImplSDL3_NewFrame();
   ImGui::NewFrame();
 
-  ImGui::Begin("Dummy");
+  ImGui::Begin("Properties");
+
+  ImGui::Text("Finger x: %.1f", state->gui.finger_x);
+  ImGui::Text("Finger y: %.1f", state->gui.finger_y);
 
   ImGui::End();
 
@@ -91,8 +94,12 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     ImGui::End();
   }
 
-  if (state->mvp.is_cam_move) {
+  if (state->mvp.is_cam_move_f) {
     state->mvp.cam_pos += cam_speed * state->mvp.cam_front;
+  }
+
+  if (state->mvp.is_cam_move_b) {
+    state->mvp.cam_pos -= cam_speed * state->mvp.cam_front;
   }
 
   state->mvp.view = glm::lookAt(state->mvp.cam_pos,
@@ -148,53 +155,67 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 
       break;
     case SDL_EVENT_FINGER_DOWN:
-      if (event->tfinger.x < 0.5f) {
-        state->mvp.is_cam_move = true;
+      if (!(event->tfinger.x < 0.5f && event->tfinger.y > 0.5f)) {
+        break;
+      }
+
+      if (event->tfinger.y < 0.75f) {
+        state->mvp.is_cam_move_f = true;
+      }
+
+      if (event->tfinger.y > 0.75f) {
+        state->mvp.is_cam_move_b = true;
       }
 
       break;
     case SDL_EVENT_FINGER_UP:
-      state->mvp.is_cam_move = false;
+      state->mvp.is_cam_move_f = false;
+      state->mvp.is_cam_move_b = false;
       state->mvp.is_first_click = true;
 
       break;
     case SDL_EVENT_FINGER_MOTION: {
+      state->gui.finger_x = event->tfinger.x;
+      state->gui.finger_y = event->tfinger.y;
+
+      if (!(event->tfinger.x > 0.5f)) {
+        break;
+      }
+
       float pos_x = event->tfinger.x * state->dp.width;
       float pos_y = event->tfinger.y * state->dp.height;
 
-      if (event->tfinger.x > 0.5f) {
-        if (state->mvp.is_first_click) {
-          state->mvp.last_pos_x = pos_x;
-          state->mvp.last_pos_y = pos_y;
-
-          state->mvp.is_first_click = false;
-        }
-
-        float offset_x = pos_x - state->mvp.last_pos_x;
-        float offset_y = state->mvp.last_pos_y - pos_y;
+      if (state->mvp.is_first_click) {
         state->mvp.last_pos_x = pos_x;
         state->mvp.last_pos_y = pos_y;
 
-        offset_x *= state->mvp.cam_sensitivity;
-        offset_y *= state->mvp.cam_sensitivity;
-
-        state->mvp.cam_yaw += offset_x;
-        state->mvp.cam_pitch += offset_y;
-
-        state->mvp.cam_pitch =
-            glm::clamp(state->mvp.cam_pitch, -89.0f, 89.0f);
-
-        glm::vec3 dir;
-        dir.x = std::cos(glm::radians(state->mvp.cam_yaw)) *
-                std::cos(glm::radians(state->mvp.cam_pitch));
-
-        dir.y = std::sin(glm::radians(state->mvp.cam_pitch));
-
-        dir.z = std::sin(glm::radians(state->mvp.cam_yaw)) *
-                std::cos(glm::radians(state->mvp.cam_pitch));
-
-        state->mvp.cam_front = glm::normalize(dir);
+        state->mvp.is_first_click = false;
       }
+
+      float offset_x = pos_x - state->mvp.last_pos_x;
+      float offset_y = state->mvp.last_pos_y - pos_y;
+      state->mvp.last_pos_x = pos_x;
+      state->mvp.last_pos_y = pos_y;
+
+      offset_x *= state->mvp.cam_sensitivity;
+      offset_y *= state->mvp.cam_sensitivity;
+
+      state->mvp.cam_yaw += offset_x;
+      state->mvp.cam_pitch += offset_y;
+
+      state->mvp.cam_pitch =
+          glm::clamp(state->mvp.cam_pitch, -89.0f, 89.0f);
+
+      glm::vec3 dir;
+      dir.x = std::cos(glm::radians(state->mvp.cam_yaw)) *
+              std::cos(glm::radians(state->mvp.cam_pitch));
+
+      dir.y = std::sin(glm::radians(state->mvp.cam_pitch));
+
+      dir.z = std::sin(glm::radians(state->mvp.cam_yaw)) *
+              std::cos(glm::radians(state->mvp.cam_pitch));
+
+      state->mvp.cam_front = glm::normalize(dir);
     }
 
     break;

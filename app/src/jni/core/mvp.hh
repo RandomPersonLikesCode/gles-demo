@@ -20,7 +20,8 @@ namespace Core {
     float last_pos_x = 0.0f;
     float last_pos_y = 0.0f;
 
-    bool is_cam_move = false;
+    bool is_cam_move_f = false;
+    bool is_cam_move_b = false;
     bool is_first_click = true;
 
     void create(float aspect_ratio);
