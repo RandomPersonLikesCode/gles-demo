@@ -17,6 +17,12 @@ for Android.
 ### Building the APK
 
 ```shell
+xmake f -p android
+bash ./scripts/prebuild.bash
+
+xmake build
+
+bash ./scripts/postbuild.bash
 ```
 
 ### Signing the APK
