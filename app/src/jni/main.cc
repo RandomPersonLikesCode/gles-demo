@@ -27,7 +27,6 @@
 #include "./core/buffers.hh"
 #include "./core/display.hh"
 #include "./core/gui.hh"
-#include "./core/model.hh"
 #include "./core/mvp.hh"
 #include "./core/shader.hh"
 #include "./core/texture.hh"
@@ -51,7 +50,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   state->prog.create();
   state->mvp.create(state->dp.aspect_ratio);
   state->tex.create(App::metal);
-  state->teapot.create(App::teapot);
 
   last = SDL_GetTicksNS();
 
@@ -73,17 +71,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   ImGui_ImplSDL3_NewFrame();
   ImGui::NewFrame();
 
-  ImGui::Begin("Model Properties");
-
-  ImGui::Text("Path: %s", App::teapot);
-  ImGui::Text("Name: %s", state->teapot.model->name);
-  ImGui::Text("Author: %s", state->teapot.model->author);
-  ImGui::Text("Description: %s", state->teapot.model->desc);
-  ImGui::Text("License: %s", state->teapot.model->license);
-
-  ImGui::NewLine();
-
-  ImGui::Text("Vertex count: %u", state->teapot.model->numvertex);
+  ImGui::Begin("Dummy");
 
   ImGui::End();
 
