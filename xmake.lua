@@ -1,11 +1,12 @@
 local src_root = "app/src/jni"
 local arch = "arm64-v8a"
+local sdk = os.getenv("ANDROID_HOME")
 
 if is_arch("armeabi-v7a") then
   arch = "armeabi-v7a"
 end
 
-local sdl_root = src_root .. "/third_party/lib/SDL3/" .. arch
+local sdl_root = sdk .. "/lib/SDL3/" .. arch
 
 set_project("gles-demo")
 set_version("1.0.0")
@@ -31,7 +32,10 @@ add_shflags({
   "-Wl,--no-undefined",
 })
 
-add_sysincludedirs(src_root .. "/third_party/include")
+add_sysincludedirs({
+  src_root .. "/third_party/include",
+  sdk .. "/include"
+})
 add_linkdirs({
   sdl_root
 })
